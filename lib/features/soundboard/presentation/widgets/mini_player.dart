@@ -68,18 +68,42 @@ class MiniPlayer extends ConsumerWidget {
               ),
 
               // Controls
-              StreamBuilder<PlayerState>(
-                stream: audioService.playerStateStream,
-                builder: (context, stateSnapshot) {
-                  final playing = stateSnapshot.data?.playing ?? false;
-                  return IconButton(
-                    icon: Icon(
-                      playing
-                          ? PhosphorIcons.pause(PhosphorIconsStyle.fill)
-                          : PhosphorIcons.play(PhosphorIconsStyle.fill),
-                    ),
-                    color: Colors.white,
-                    onPressed: () => audioService.togglePlayPause(),
+              StreamBuilder<ProcessingState>(
+                stream: audioService.processingStateStream,
+                builder: (context, procSnapshot) {
+                  final processingState = procSnapshot.data;
+                  final isLoading =
+                      processingState == ProcessingState.buffering ||
+                      processingState == ProcessingState.loading;
+
+                  if (isLoading) {
+                    return Container(
+                      margin: const EdgeInsets.all(
+                        12,
+                      ), // Match IconButton size approx
+                      width: 24,
+                      height: 24,
+                      child: const CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    );
+                  }
+
+                  return StreamBuilder<PlayerState>(
+                    stream: audioService.playerStateStream,
+                    builder: (context, stateSnapshot) {
+                      final playing = stateSnapshot.data?.playing ?? false;
+                      return IconButton(
+                        icon: Icon(
+                          playing
+                              ? PhosphorIcons.pause(PhosphorIconsStyle.fill)
+                              : PhosphorIcons.play(PhosphorIconsStyle.fill),
+                        ),
+                        color: Colors.white,
+                        onPressed: () => audioService.togglePlayPause(),
+                      );
+                    },
                   );
                 },
               ),

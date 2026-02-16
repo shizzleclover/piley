@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/services/supabase_service.dart';
 import 'core/services/offline_service.dart';
+import 'core/services/favorites_service.dart';
 import 'core/theme/app_theme.dart';
 import 'main_nav.dart';
 
@@ -13,6 +14,7 @@ void main() async {
 
   // Initialize Offline Storage
   await OfflineService().init();
+  await FavoritesService().init();
 
   runApp(const ProviderScope(child: MyApp()));
 }
@@ -27,7 +29,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.dark,
       darkTheme: AppTheme.darkTheme,
-      home: const AuthGate(),
+      home: const AppShell(),
     );
   }
 }

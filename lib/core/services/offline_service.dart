@@ -34,6 +34,11 @@ class OfflineService {
 
   // Download a sound
   Future<void> downloadSound(Sound sound) async {
+    if (kIsWeb) {
+      print('Download not supported on Web');
+      return;
+    }
+
     try {
       final box = Hive.box(boxName);
 

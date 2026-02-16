@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart'; // For Uint8List and kIsWeb
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -33,6 +34,7 @@ class SoundRepository {
                   filePath: sound.filePath,
                   localPath: offlineSoundMap['localPath'],
                   uploaderId: sound.uploaderId,
+                  uploaderName: sound.uploaderName,
                   playCount: sound.playCount,
                   createdAt: sound.createdAt,
                 );
@@ -45,16 +47,15 @@ class SoundRepository {
   }
 
   // Upload sound file and metadata
-  Future<void> uploadSound(String title, File file) async {
-    final user = _client.auth.currentUser;
-    if (user == null) {
-      throw Exception('Not authenticated. Please restart the app.');
-    }
-
+  // Accepting bytes allows this to work on Web where File path is not available/usable
+  Future<void> uploadSound({
+    required String title,
+    required Uint8List fileBytes,
+    required String fileExtension,
+    String? uploaderName,
+  }) async {
     // 1. Upload to Supabase Storage
-    final fileExt = file.path.split('.').last;
-    final fileName = '${const Uuid().v4()}.$fileExt';
-    final fileBytes = await file.readAsBytes();
+    final fileName = '${const Uuid().v4()}.$fileExtension';
 
     await _client.storage
         .from('sounds')
@@ -68,15 +69,24 @@ class SoundRepository {
     final publicUrl = _client.storage.from('sounds').getPublicUrl(fileName);
 
     // 3. Insert metadata
+    // Use null for uploader_id if not logged in (requires uploader_id to be nullable in DB)
+    final userId = _client.auth.currentUser?.id;
+
     await _client.from('sounds').insert({
       'title': title,
       'file_path': publicUrl,
-      'uploader_id': user.id,
+      'uploader_id': userId,
+      'uploader_name': uploaderName,
     });
   }
 
   // Increment play count
   Future<void> incrementPlayCount(String soundId) async {
-    // Best effort
+    // Best effort - might fail without RLS policy for Update
+    try {
+      await _client.rpc('increment_play_count', params: {'sound_id': soundId});
+    } catch (e) {
+      // Ignore errors for now, play count is vanity
+    }
   }
 }

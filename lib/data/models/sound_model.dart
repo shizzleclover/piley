@@ -1,9 +1,10 @@
 class Sound {
   final String id;
   final String title;
-  final String filePath;
-  final String? localPath; // For offline playback
+  final String filePath; // URL for remote, unused for local-only?
+  final String? localPath; // For offline
   final String uploaderId;
+  final String? uploaderName; // New field
   final int playCount;
   final DateTime createdAt;
 
@@ -13,19 +14,23 @@ class Sound {
     required this.filePath,
     this.localPath,
     required this.uploaderId,
-    required this.playCount,
+    this.uploaderName,
+    this.playCount = 0,
     required this.createdAt,
   });
 
   factory Sound.fromMap(Map<String, dynamic> map) {
     return Sound(
-      id: map['id'].toString(),
-      title: map['title'].toString(),
-      filePath: map['file_path'].toString(),
-      localPath: map['localPath']?.toString(), // Nullable
-      uploaderId: map['uploader_id'].toString(),
-      playCount: (map['play_count'] as num?)?.toInt() ?? 0,
-      createdAt: DateTime.parse(map['created_at'].toString()),
+      id: map['id'] ?? '',
+      title: map['title'] ?? 'Untitled',
+      filePath: map['file_path'] ?? '',
+      localPath: map['localPath'],
+      uploaderId: map['uploader_id'] ?? 'anonymous',
+      uploaderName: map['uploader_name'],
+      playCount: map['play_count']?.toInt() ?? 0,
+      createdAt: map['created_at'] != null
+          ? DateTime.parse(map['created_at'])
+          : DateTime.now(),
     );
   }
 

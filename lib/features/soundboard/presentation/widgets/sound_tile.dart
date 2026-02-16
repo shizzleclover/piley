@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../data/models/sound_model.dart';
 import '../../../../data/repositories/sound_repository.dart';
 import '../providers/soundboard_providers.dart';
@@ -74,8 +75,10 @@ class SoundTile extends ConsumerWidget {
                           return IconButton(
                             icon: Icon(
                               isDownloaded
-                                  ? Icons.download_done
-                                  : Icons.download,
+                                  ? PhosphorIcons.checkCircle(
+                                      PhosphorIconsStyle.fill,
+                                    )
+                                  : PhosphorIcons.downloadSimple(),
                               color: isDownloaded
                                   ? Colors.green
                                   : Colors.white70,

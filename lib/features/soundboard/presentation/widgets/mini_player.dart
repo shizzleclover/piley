@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/services/audio_service.dart';
 import '../../../../data/models/sound_model.dart';
 import '../providers/soundboard_providers.dart';
@@ -35,7 +36,7 @@ class MiniPlayer extends ConsumerWidget {
                   color: Colors.grey.shade800,
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: const Icon(Icons.music_note, color: Colors.white70),
+                child: Icon(PhosphorIcons.musicNote(), color: Colors.white70),
               ),
               const SizedBox(width: 12),
 
@@ -72,7 +73,11 @@ class MiniPlayer extends ConsumerWidget {
                 builder: (context, stateSnapshot) {
                   final playing = stateSnapshot.data?.playing ?? false;
                   return IconButton(
-                    icon: Icon(playing ? Icons.pause : Icons.play_arrow),
+                    icon: Icon(
+                      playing
+                          ? PhosphorIcons.pause(PhosphorIconsStyle.fill)
+                          : PhosphorIcons.play(PhosphorIconsStyle.fill),
+                    ),
                     color: Colors.white,
                     onPressed: () => audioService.togglePlayPause(),
                   );

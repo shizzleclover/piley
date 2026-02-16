@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../features/auth/presentation/pages/onboarding_page.dart';
 import '../../features/soundboard/presentation/pages/soundboard_page.dart';
@@ -58,14 +59,22 @@ class _AppShellState extends State<AppShell> {
         onDestinationSelected: (index) {
           setState(() => _currentIndex = index);
         },
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.home_filled), label: 'Home'),
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.add_circle_outline),
+            icon: Icon(PhosphorIcons.house()),
+            selectedIcon: Icon(PhosphorIcons.house(PhosphorIconsStyle.fill)),
+            label: 'Home',
+          ),
+          NavigationDestination(
+            icon: Icon(PhosphorIcons.plusCircle()),
+            selectedIcon: Icon(
+              PhosphorIcons.plusCircle(PhosphorIconsStyle.fill),
+            ),
             label: 'Upload',
           ),
           NavigationDestination(
-            icon: Icon(Icons.person_outline),
+            icon: Icon(PhosphorIcons.user()),
+            selectedIcon: Icon(PhosphorIcons.user(PhosphorIconsStyle.fill)),
             label: 'Library',
           ),
         ],

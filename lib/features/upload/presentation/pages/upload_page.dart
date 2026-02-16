@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
-
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:uuid/uuid.dart';
 import '../../../soundboard/presentation/providers/soundboard_providers.dart';
 
@@ -80,12 +80,15 @@ class _UploadPageState extends ConsumerState<UploadPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Sound uploaded successfully!')),
         );
-        Navigator.pop(context);
+        Navigator.pop(context); // This will pop back to the previous screen
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      // Ensure context is still mounted before using it
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
     } finally {
       if (mounted) setState(() => _isUploading = false);
     }
@@ -112,7 +115,7 @@ class _UploadPageState extends ConsumerState<UploadPage> {
               children: [
                 ElevatedButton.icon(
                   onPressed: _isRecording ? null : _pickFile,
-                  icon: const Icon(Icons.upload_file),
+                  icon: Icon(PhosphorIcons.uploadSimple()),
                   label: const Text('Pick File'),
                 ),
                 ElevatedButton.icon(
@@ -121,7 +124,11 @@ class _UploadPageState extends ConsumerState<UploadPage> {
                     backgroundColor: _isRecording ? Colors.red : null,
                     foregroundColor: _isRecording ? Colors.white : null,
                   ),
-                  icon: Icon(_isRecording ? Icons.stop : Icons.mic),
+                  icon: Icon(
+                    _isRecording
+                        ? PhosphorIcons.stop()
+                        : PhosphorIcons.microphone(),
+                  ),
                   label: Text(_isRecording ? 'Stop Recording' : 'Record Mic'),
                 ),
               ],

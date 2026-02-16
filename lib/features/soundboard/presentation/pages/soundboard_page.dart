@@ -1,17 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../providers/soundboard_providers.dart';
 import '../widgets/sound_tile.dart';
 
 class SoundboardPage extends ConsumerWidget {
   const SoundboardPage({super.key});
-
-  String _getGreeting() {
-    final hour = DateTime.now().hour;
-    if (hour < 12) return 'Good Morning';
-    if (hour < 17) return 'Good Afternoon';
-    return 'Good Evening';
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -19,91 +13,99 @@ class SoundboardPage extends ConsumerWidget {
 
     return Scaffold(
       extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: const Text(
+          'Piley',
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
+            fontSize: 24,
+            letterSpacing: -1,
+          ),
+        ),
+        centerTitle: false,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: Icon(PhosphorIcons.magnifyingGlass()),
+            onPressed: () {},
+          ),
+          IconButton(icon: Icon(PhosphorIcons.gear()), onPressed: () {}),
+        ],
+      ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            stops: [0.0, 0.3, 1.0],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
             colors: [
-              Color(0xFF404040), // Dark Grey/Green tint
-              Color(0xFF121212),
+              Color(0xFF1DB954), // Spotify Green - faint at top
+              Color(0xFF121212), // Dark
               Color(0xFF121212),
             ],
+            stops: [0.0, 0.4, 1.0],
           ),
         ),
-        child: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              expandedHeight: 120.0,
-              flexibleSpace: FlexibleSpaceBar(
-                titlePadding: const EdgeInsets.only(left: 16, bottom: 16),
-                title: Text(
-                  _getGreeting(),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 24,
-                    color: Colors.white,
+        child: soundsAsync.when(
+          data: (sounds) {
+            if (sounds.isEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      PhosphorIcons.smileySad(),
+                      size: 64,
+                      color: Colors.grey,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'No sounds yet',
+                      style: TextStyle(color: Colors.grey, fontSize: 18),
+                    ),
+                  ],
+                ),
+              );
+            }
+            return ListView(
+              padding: const EdgeInsets.only(
+                top: 100,
+                bottom: 100,
+              ), // Space for AppBar and MiniPlayer
+              children: [
+                // "Recently Played" or similar header could go here
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Text(
+                    'Fresh Sounds',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
-              ),
-              actions: [
-                IconButton(
-                  icon: const Icon(
-                    Icons.settings_outlined,
-                    color: Colors.white,
+                const SizedBox(height: 16),
+
+                // Grid
+                GridView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 0.75,
                   ),
-                  onPressed: () {},
-                ),
-                IconButton(
-                  icon: const Icon(Icons.history, color: Colors.white),
-                  onPressed: () {},
+                  itemCount: sounds.length,
+                  itemBuilder: (context, index) =>
+                      SoundTile(sound: sounds[index]),
                 ),
               ],
-            ),
-
-            // Content
-            soundsAsync.when(
-              data: (sounds) {
-                if (sounds.isEmpty) {
-                  return const SliverFillRemaining(
-                    child: Center(
-                      child: Text('No sounds yet. Be the first to upload!'),
-                    ),
-                  );
-                }
-                return SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(
-                    16,
-                    0,
-                    16,
-                    80,
-                  ), // Bottom padding for MiniPlayer
-                  sliver: SliverGrid(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
-                          childAspectRatio: 0.8, // Taller cards
-                        ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) => SoundTile(sound: sounds[index]),
-                      childCount: sounds.length,
-                    ),
-                  ),
-                );
-              },
-              loading: () => const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator()),
-              ),
-              error: (err, stack) => SliverFillRemaining(
-                child: Center(child: Text('Error: $err')),
-              ),
-            ),
-          ],
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (err, stack) => Center(child: Text('Error: $err')),
         ),
       ),
     );

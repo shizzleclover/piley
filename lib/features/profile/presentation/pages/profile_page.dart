@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../data/models/sound_model.dart';
@@ -27,7 +28,17 @@ class ProfilePage extends ConsumerWidget {
     final soundsAsync = ref.watch(userSoundsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('My Profile')),
+      appBar: AppBar(
+        title: const Text('My Profile'),
+        actions: [
+          IconButton(
+            icon: Icon(PhosphorIcons.signOut()),
+            onPressed: () async {
+              await Supabase.instance.client.auth.signOut();
+            },
+          ),
+        ],
+      ),
       body: Column(
         children: [
           const SizedBox(height: 24),
@@ -43,10 +54,33 @@ class ProfilePage extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'User ID: ${user?.id.substring(0, 6)}...', // Displaying part of ID
-            style: Theme.of(context).textTheme.titleMedium,
+            user?.email ?? 'Anonymous User',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'User ID: ${user?.id.substring(0, 6)}...',
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: Colors.grey),
           ),
           const Divider(height: 48),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'My Uploads',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
           Expanded(
             child: soundsAsync.when(
               data: (sounds) {
@@ -56,11 +90,12 @@ class ProfilePage extends ConsumerWidget {
                   );
                 }
                 return GridView.builder(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 0.75,
                   ),
                   itemCount: sounds.length,
                   itemBuilder: (context, index) {
